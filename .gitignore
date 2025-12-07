@@ -4,3 +4,12 @@ myapp/app/terraform/.terraform/
 
 # Ignore python virtual env
 .venv/
+
+# Ignore office and binary files
+*.xlsx
+*~lock*
+*.docx
+*.jpg
+*.jpeg
+*.png
+*.pdf
