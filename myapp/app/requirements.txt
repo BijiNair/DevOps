@@ -1,0 +1,6 @@
+requests==2.32.3          # For making HTTP API calls
+python-dotenv==1.0.1      # For environment variable management
+boto3==1.35.0             # For AWS integration
+pandas==2.2.3             # For data processing
+flask
+gunicorn
