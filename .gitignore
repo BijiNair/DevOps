@@ -1,3 +1,6 @@
 
 # Ignore terraform runtime
 myapp/app/terraform/.terraform/
+
+# Ignore python virtual env
+.venv/
