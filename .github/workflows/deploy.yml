@@ -73,6 +73,54 @@ jobs:
         run: terraform init
 
       # -------------------------
+      # IMPORT EXISTING IAM RESOURCES (if present)
+      # -------------------------
+      - name: Terraform Import existing IAM resources
+        working-directory: myapp/app/terraform
+        run: |
+          # Ensure initialized
+          terraform init
+          # Fail on unexpected errors, but allow import to fail if resource already present
+          set -e
+
+          echo "Checking Terraform state for aws_iam_role.ec2_role..."
+          if ! terraform state list | grep -xq 'aws_iam_role.ec2_role'; then
+            echo "Importing existing IAM role ec2_ecr_pull_role into terraform state..."
+            terraform import aws_iam_role.ec2_role ec2_ecr_pull_role || true
+          else
+            echo "aws_iam_role.ec2_role already in state, skipping import."
+          fi
+
+          echo "Checking Terraform state for aws_iam_instance_profile.ec2_profile..."
+          if ! terraform state list | grep -xq 'aws_iam_instance_profile.ec2_profile'; then
+            echo "Importing existing instance profile ec2_ecr_profile into terraform state..."
+            terraform import aws_iam_instance_profile.ec2_profile ec2_ecr_profile || true
+          else
+            echo "aws_iam_instance_profile.ec2_profile already in state, skipping import."
+          fi
+
+          echo "Checking Terraform state for aws_iam_role_policy.ecr_policy..."
+          if ! terraform state list | grep -xq 'aws_iam_role_policy.ecr_policy'; then
+            echo "Importing inline role policy ecr_policy into terraform state..."
+            terraform import aws_iam_role_policy.ecr_policy ec2_ecr_pull_role/ecr_policy || true
+          else
+            echo "aws_iam_role_policy.ecr_policy already in state, skipping import."
+          fi
+
+          echo "Checking for existing security group named 'ec2_sg_tf'..."
+          SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=ec2_sg_tf" --query 'SecurityGroups[0].GroupId' --output text || true)
+          if [ -n "$SG_ID" ] && [ "$SG_ID" != "None" ]; then
+            echo "Found security group id: $SG_ID - attempting import into terraform state..."
+            if ! terraform state list | grep -xq 'aws_security_group.ec2_sg_tf'; then
+              terraform import aws_security_group.ec2_sg_tf $SG_ID || true
+            else
+              echo "aws_security_group.ec2_sg_tf already in state, skipping import."
+            fi
+          else
+            echo "No security group named 'ec2_sg_tf' found in the account; skipping import."
+          fi
+
+      # -------------------------
       # TERRAFORM PLAN
       # -------------------------
       - name: Terraform Plan
