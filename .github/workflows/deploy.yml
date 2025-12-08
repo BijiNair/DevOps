@@ -77,11 +77,17 @@ jobs:
       # -------------------------
       - name: Terraform Plan
         working-directory: myapp/app/terraform
-        run: terraform plan -out=tfplan
+        run: |
+              terraform plan \
+                    -var="ecr_repository_url=${{ steps.login-ecr.outputs.registry }}/myapp" \
+                    -out=tfplan
 
       # -------------------------
       # TERRAFORM APPLY
       # -------------------------
       - name: Terraform Apply
         working-directory: myapp/app/terraform
-        run: terraform apply -auto-approve tfplan
+        run: |
+            terraform apply \
+                  -var="ecr_repository_url=${{ steps.login-ecr.outputs.registry }}/myapp" \
+                  -auto-approve tfplan

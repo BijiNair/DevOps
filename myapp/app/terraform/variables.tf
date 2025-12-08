@@ -11,7 +11,7 @@ variable "key_name" {
 }
 
 variable "ecr_repository_url" {
-  description = "131483117382.dkr.ecr.us-east-1.amazonaws.com/myapp"
+  type = string
 }
 
 variable "container_port" {
