@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t myapp /app
+          docker build -t myapp  app
 
       - name: Tag image for ECR
         run: |
