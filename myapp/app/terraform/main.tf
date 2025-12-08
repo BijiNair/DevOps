@@ -78,6 +78,7 @@ resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
   key_name               = var.key_name
+  subnet_id              = var.subnet_id
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.id
   vpc_security_group_ids = [aws_security_group.ec2_sg_tf.id]
 
