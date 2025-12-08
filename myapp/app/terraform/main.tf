@@ -43,8 +43,8 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 # ---------- SECURITY GROUP ----------
-resource "aws_security_group" "ec2_sg" {
-  name        = "ec2_sg"
+resource "aws_security_group" "ec2_sg_tf" {
+  name        = "ec2_sg_tf"
   description = "Allow HTTP"
 
   ingress {
@@ -79,7 +79,7 @@ resource "aws_instance" "app_server" {
   instance_type          = var.instance_type
   key_name               = var.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.id
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  vpc_security_group_ids = [aws_security_group.ec2_sg_tf.id]
 
   user_data = templatefile("${path.module}/user_data.sh", {
     aws_region         = var.aws_region
