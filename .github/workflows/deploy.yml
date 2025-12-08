@@ -1,18 +1,25 @@
 name: CI/CD - Docker + Terraform + ECR
 
 on:
-  workflow_dispatch:        # <-- allows manual trigger
+  workflow_dispatch:        # Manual trigger
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]    # Auto-run on push to main
 
 jobs:
-  build_and_push:
+  build_push_and_terraform:
     runs-on: ubuntu-latest
 
     steps:
+
+      # -------------------------
+      # CHECKOUT
+      # -------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # -------------------------
+      # AWS CREDENTIALS
+      # -------------------------
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -20,22 +27,61 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # -------------------------
+      # LOGIN TO ECR
+      # -------------------------
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # -------------------------
+      # DOCKER BUILD
+      # -------------------------
       - name: Build Docker image
         run: |
           docker build -t myapp myapp/app
 
+      # -------------------------
+      # TAG IMAGE FOR ECR
+      # -------------------------
       - name: Tag image for ECR
         run: |
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG=latest
           docker tag myapp:latest $ECR_REGISTRY/myapp:$IMAGE_TAG
 
+      # -------------------------
+      # PUSH IMAGE TO ECR
+      # -------------------------
       - name: Push image to ECR
         run: |
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG=latest
           docker push $ECR_REGISTRY/myapp:$IMAGE_TAG
+
+      # -------------------------
+      # TERRAFORM SETUP
+      # -------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # -------------------------
+      # TERRAFORM INIT
+      # -------------------------
+      - name: Terraform Init
+        working-directory: myapp/app/terraform
+        run: terraform init
+
+      # -------------------------
+      # TERRAFORM PLAN
+      # -------------------------
+      - name: Terraform Plan
+        working-directory: myapp/app/terraform
+        run: terraform plan -out=tfplan
+
+      # -------------------------
+      # TERRAFORM APPLY
+      # -------------------------
+      - name: Terraform Apply
+        working-directory: myapp/app/terraform
+        run: terraform apply -auto-approve tfplan
