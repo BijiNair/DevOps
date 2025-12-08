@@ -80,6 +80,10 @@ jobs:
         run: |
           # Ensure initialized
           terraform init
+          # export required variables so import/terraform commands don't error on missing vars
+          export TF_VAR_ecr_repository_url="${{ steps.login-ecr.outputs.registry }}/myapp"
+          export TF_VAR_subnet_id="${{ secrets.SUBNET_ID }}"
+
           # Fail on unexpected errors, but allow import to fail if resource already present
           set -e
 
