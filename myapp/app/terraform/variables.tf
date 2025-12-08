@@ -7,7 +7,8 @@ variable "instance_type" {
 }
 
 variable "key_name" {
-  description = "myKey"
+  type = string
+  default = "myKey"
 }
 
 variable "ecr_repository_url" {
