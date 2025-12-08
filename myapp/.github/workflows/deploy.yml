@@ -1,0 +1,41 @@
+name: CI/CD - Docker + Terraform + ECR
+
+on:
+  workflow_dispatch:        # <-- allows manual trigger
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t myapp ./app
+
+      - name: Tag image for ECR
+        run: |
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG=latest
+          docker tag myapp:latest $ECR_REGISTRY/myapp:$IMAGE_TAG
+
+      - name: Push image to ECR
+        run: |
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG=latest
+          docker push $ECR_REGISTRY/myapp:$IMAGE_TAG
