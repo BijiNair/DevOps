@@ -2,7 +2,6 @@ name: CI/CD - Docker + Terraform + ECR
 
 on:
   workflow_dispatch:        # <-- allows manual trigger
-  workflow_dispatch:
   push:
     branches: [ "main" ]
 
