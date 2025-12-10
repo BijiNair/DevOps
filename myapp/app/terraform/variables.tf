@@ -1,25 +1,36 @@
 variable "aws_region" {
-  default = "us-east-1"
-}
-
-variable "instance_type" {
-  default = "t3.micro"
-}
-
-variable "subnet_id" {
-  description = "Subnet id for EC2 instance"
+  description = "AWS region to deploy into"
   type        = string
 }
 
-variable "key_name" {
-  type = string
-  default = "myKey"
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t2.micro"
 }
 
-variable "ecr_repository_url" {
-  type = string
+variable "key_name" {
+  description = "SSH key pair name"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "Subnet ID for the EC2 instance"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "VPC ID that contains the subnet"
+  type        = string
 }
 
 variable "container_port" {
-  default = 8000
+  description = "The port your Docker container exposes"
+  type        = number
+  default     = 80
+}
+
+variable "ecr_repository_url" {
+  description = "Full ECR repo URL including account ID"
+  type        = string
 }
