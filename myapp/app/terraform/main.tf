@@ -74,10 +74,9 @@ resource "aws_security_group" "ec2_sg_tf" {
 
 # Use existing SG ID or newly created SG ID
 locals {
-  final_sg_id = length(data.aws_security_groups.existing.ids) > 0 ?
-    data.aws_security_groups.existing.ids[0] :
-    aws_security_group.ec2_sg_tf[0].id
+  final_sg_id = try(data.aws_security_groups.existing.ids[0], aws_security_group.ec2_sg_tf[0].id)
 }
+
 
 # Rules apply to whichever SG is active
 resource "aws_security_group_rule" "http_rule" {
